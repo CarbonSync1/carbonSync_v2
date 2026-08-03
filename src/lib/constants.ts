@@ -5,6 +5,7 @@ export const APP_NAME = "CarbonSynq";
 export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
+  ONBOARDING: "/onboarding",
   INVOICES: "/invoices",
   DASHBOARD: "/dashboard",
   ANALYTICS: "/analytics",
@@ -13,6 +14,7 @@ export const ROUTES = {
 export const NON_MARKETING_ROUTES = [
   ROUTES.LOGIN,
   ROUTES.REGISTER,
+  ROUTES.ONBOARDING,
   ROUTES.INVOICES,
   ROUTES.DASHBOARD,
   ROUTES.ANALYTICS,
