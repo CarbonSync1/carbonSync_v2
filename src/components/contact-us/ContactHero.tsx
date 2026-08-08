@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, Mail, Phone, MapPin, Clock, ShieldCheck, User, Building, ChevronDown, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
+import { Leaf, Mail, Phone, ShieldCheck, User, Building, ChevronDown, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 
 const countryCodes = [
   { code: "+91", label: "IN" },
@@ -105,7 +105,7 @@ export default function ContactHero() {
               </div>
               <div className="flex flex-col pt-0.5">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Email</span>
-                <span className="text-[#0f172a] font-bold text-[15px] group-hover:text-green-600 transition-colors break-all">pushkarsingh.carbonsynqearth@gmail.com</span>
+                <span className="text-[#0f172a] font-bold text-[15px] group-hover:text-green-600 transition-colors break-all">contact@carbonsynqearth.com</span>
               </div>
             </div>
 
@@ -119,27 +119,6 @@ export default function ContactHero() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4 group cursor-pointer">
-              <div className="w-11 h-11 bg-green-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-green-600/20 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-green-600/30">
-                <MapPin size={20} className="text-white" />
-              </div>
-              <div className="flex flex-col pt-0.5">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Address</span>
-                <span className="text-[#0f172a] font-bold text-[15px] group-hover:text-green-600 transition-colors leading-tight">
-                  1st Floor, E58, Sec 3, Noida, Uttar Pradesh
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4 group cursor-pointer">
-              <div className="w-11 h-11 bg-green-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-green-600/20 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-green-600/30">
-                <Clock size={20} className="text-white" />
-              </div>
-              <div className="flex flex-col pt-0.5">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Working Hours</span>
-                <span className="text-[#0f172a] font-bold text-[15px] group-hover:text-green-600 transition-colors">Mon - Fri | 9:00 AM - 6:00 PM</span>
-              </div>
-            </div>
           </div>
         </motion.div>
 

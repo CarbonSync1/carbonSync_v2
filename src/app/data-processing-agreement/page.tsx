@@ -639,7 +639,7 @@ export default function DataProcessingAgreement() {
                   <div className="space-y-6 md:space-y-10 w-full md:w-auto">
                     <div className="p-5 md:p-8 lg:p-10 rounded-[1.5rem] lg:rounded-[2.5rem] bg-white border border-gray-200 shadow-lg">
                       <p className="text-xs font-black uppercase tracking-widest text-green-700 mb-3">Direct Legal Contact</p>
-                      <p className="text-lg md:text-xl lg:text-2xl font-black text-gray-900 break-all">pushkarsingh.carbonsynqearth@gmail.com</p>
+                      <p className="text-lg md:text-xl lg:text-2xl font-black text-gray-900 break-all">contact@carbonsynqearth.com</p>
                     </div>
                     <form onSubmit={handleRaiseTicket} className="space-y-4">
                       <input type="hidden" name="Subject" value="New Compliance Ticket Requested" />

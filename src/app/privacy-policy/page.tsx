@@ -411,7 +411,7 @@ export default function PrivacyPolicy() {
                       <p className="text-[10px] font-black uppercase tracking-widest text-green-400">Contact Repository</p>
                       <div className="space-y-2">
                         <p className="text-xl md:text-2xl font-bold">Pushkar Singh</p>
-                        <p className="text-gray-400 font-medium text-sm md:text-base">pushkarsingh.carbonsynqearth@gmail.com</p>
+                        <p className="text-gray-400 font-medium text-sm md:text-base">contact@carbonsynqearth.com</p>
                         <p className="text-gray-400 font-medium text-sm md:text-base">+91 9911875613</p>
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Leaf, ArrowRight } from "lucide-react";
+import { Mail, Phone, Leaf, ArrowRight } from "lucide-react";
 
 export default function FooterContact() {
   return (
@@ -26,17 +26,6 @@ export default function FooterContact() {
         {/* Middle Column - Contact Info */}
         <div className="flex flex-col items-center xl:w-1/3">
           <div className="space-y-8 w-full max-w-sm">
-            <div className="flex items-start gap-6 group cursor-pointer">
-              <div className="w-12 h-12 bg-white/5 text-green-500 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-green-500 group-hover:text-white transition-all">
-                <MapPin size={22} />
-              </div>
-              <div>
-                <h4 className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1">Office</h4>
-                <p className="text-[14px] text-white font-medium leading-snug">1st Floor, E58, Sec 3, Noida, Uttar Pradesh
-                </p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-6 group cursor-pointer">
               <div className="w-12 h-12 bg-white/5 text-green-500 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-green-500 group-hover:text-white transition-all">
                 <Phone size={22} />
@@ -53,7 +42,7 @@ export default function FooterContact() {
               </div>
               <div>
                 <h4 className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1">Email</h4>
-                <p className="text-[14px] text-white font-medium">pushkarsingh.carbonsynqearth@gmail.com</p>
+                <p className="text-[14px] text-white font-medium">contact@carbonsynqearth.com</p>
               </div>
             </div>
           </div>
