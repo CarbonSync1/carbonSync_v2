@@ -30,7 +30,6 @@ const links = [
     href: '#',
     hasDropdown: true,
     items: [
-      { name: 'About Us', description: 'Our mission and vision', href: '/about' },
       { name: 'Careers', description: 'Join our mission', href: '/careers' },
       { name: 'Contact Us', description: 'Get in touch with our team', href: '/contact' },
     ],

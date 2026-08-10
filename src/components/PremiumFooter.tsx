@@ -64,7 +64,6 @@ export default function PremiumFooter() {
             <div>
               <h4 className="text-[13px] font-black tracking-widest text-[#0f172a] uppercase mb-5">Company</h4>
               <ul className="space-y-3">
-                <li><Link href="/about"   className="text-[15px] font-medium text-slate-500 hover:text-green-600 transition-colors">About Us</Link></li>
                 <li><Link href="/careers" className="text-[15px] font-medium text-slate-500 hover:text-green-600 transition-colors">Careers</Link></li>
                 <li><Link href="/contact" className="text-[15px] font-medium text-slate-500 hover:text-green-600 transition-colors">Contact Us</Link></li>
               </ul>
