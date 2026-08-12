@@ -3,6 +3,7 @@ import type { StepId } from "@/types/onboarding";
 export interface OnboardingPage {
   key: string;
   stepId: StepId;
+  index: number;
   stageIndex: number;
   substepIndex: number;
   title: string;
@@ -211,13 +212,14 @@ const STEP_STAGE: Record<StepId, number> = {
 
 function buildPages(): OnboardingPage[] {
   const counters: Record<string, number> = {};
-  return SEEDS.map((seed) => {
+  return SEEDS.map((seed, index) => {
     const stageKey = seed.stepId;
     const substepIndex = counters[stageKey] ?? 0;
     counters[stageKey] = substepIndex + 1;
     return {
       key: seed.key,
       stepId: seed.stepId,
+      index,
       stageIndex: STEP_STAGE[seed.stepId],
       substepIndex,
       title: seed.title,
@@ -282,3 +284,28 @@ export function isFirstPageOfStep(pageIndex: number): boolean {
 export function pageIndexForStep(stepId: StepId): number {
   return STEP_PAGE_RANGES[stepId].start;
 }
+
+export const PAGE_FIELDS: Record<string, string[]> = {
+  "company-identity": ["legalName", "industry", "subsector"],
+  "company-organization": ["orgStructure", "consolidationApproach"],
+  "company-financials": ["employeeCount", "annualRevenue", "fiscalYearEnd"],
+  "locations-facilities": ["facilityCount", "countries", "facilityTypes", "ownershipStatus"],
+  "locations-operations": [],
+  "reporting-purpose": ["primaryReason"],
+  "reporting-frameworks": ["frameworks", "reportingType", "deadline"],
+  "reporting-history": ["previousReporting", "assurance"],
+  "reporting-audience": ["audience"],
+  "integrations-systems": [],
+  "integrations-utility": ["utilityBillingMethod"],
+  "integrations-preferences": ["dataInputMethod", "centralization"],
+  "emissions-scope1": ["scope1Fuels"],
+  "emissions-scope2": ["electricitySource", "recs", "steam"],
+  "valuechain-suppliers": ["supplierData"],
+  "valuechain-travel": ["commuting", "businessTravel"],
+  "valuechain-logistics": ["logisticsOwnership", "waste"],
+  "valuechain-digital": [],
+  "valuechain-products": ["physicalProducts"],
+  "strategy-targets": ["targets", "targetYear", "reduction"],
+  "strategy-team": ["role", "teammateEmails"],
+  "strategy-contact": ["primaryContact", "contactEmail"],
+};

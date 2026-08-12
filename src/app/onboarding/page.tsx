@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function OnboardingPage() {
   return (
-    <main className="bg-background">
+    <main className="onboarding-green bg-background">
       <OnboardingWizard />
     </main>
   );

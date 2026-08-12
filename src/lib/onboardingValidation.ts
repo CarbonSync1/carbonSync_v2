@@ -1,4 +1,5 @@
 import type { OnboardingData, StepId } from "@/types/onboarding";
+import { PAGE_BY_KEY, PAGE_FIELDS } from "./onboardingPages";
 
 export type StepErrors = Partial<Record<string, string>>;
 
@@ -144,4 +145,19 @@ export function hasFilledValues(data: OnboardingData, step: StepId): boolean {
   return Object.values(group).some((v) =>
     Array.isArray(v) ? v.length > 0 : Boolean(v)
   );
+}
+
+export function validatePage(
+  pageKey: string,
+  data: OnboardingData
+): StepErrors {
+  const page = PAGE_BY_KEY[pageKey];
+  if (!page) return {};
+  const fields = PAGE_FIELDS[pageKey] ?? [];
+  const all = validateStep(page.stepId, data);
+  const errors: StepErrors = {};
+  for (const f of fields) {
+    if (all[f]) errors[f] = all[f];
+  }
+  return errors;
 }

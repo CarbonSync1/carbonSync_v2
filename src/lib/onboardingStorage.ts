@@ -83,9 +83,11 @@ export const EMPTY_ONBOARDING: OnboardingData = {
 
 export interface OnboardingPersistence {
   data: OnboardingData;
-  currentStep: StepId;
-  completedSteps: StepId[];
+  currentPageKey?: string;
+  completedPages?: string[];
   finished?: boolean;
+  currentStep?: StepId;
+  completedSteps?: StepId[];
 }
 
 export function loadOnboarding(): OnboardingPersistence | null {

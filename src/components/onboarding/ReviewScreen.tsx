@@ -6,38 +6,40 @@ import { ArrowLeft, ArrowRight, Check, PencilLine, Sparkles } from "lucide-react
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { STEPS } from "@/lib/onboardingValidation";
-import { stepSummary } from "@/lib/onboardingSummaries";
-import type { OnboardingData, StepId } from "@/types/onboarding";
+import { PAGES, STAGE_LABELS } from "@/lib/onboardingPages";
+import { pageSummary } from "@/lib/onboardingSummaries";
+import type { OnboardingData } from "@/types/onboarding";
 
 interface ReviewScreenProps {
   data: OnboardingData;
-  completedSteps: boolean[];
-  onEdit: (step: StepId) => void;
+  completedPages: string[];
+  onEdit: (pageKey: string) => void;
   onBack: () => void;
   onComplete: () => void;
   submitting: boolean;
 }
 
-const STAGE_TITLES: Record<StepId, string> = {
-  company: "Company identity",
-  locations: "Locations & operations",
-  reporting: "Reporting & compliance",
-  integrations: "Data & integrations",
-  emissions: "Emissions profile",
-  valueChain: "Value chain",
-  strategy: "Strategy & team",
-};
+interface StageGroup {
+  stageIndex: number;
+  label: string;
+  pages: typeof PAGES;
+}
+
+const GROUPS: StageGroup[] = STAGE_LABELS.map((label, stageIndex) => ({
+  stageIndex,
+  label,
+  pages: PAGES.filter((p) => p.stageIndex === stageIndex),
+})).filter((g) => g.pages.length > 0);
 
 export function ReviewScreen({
   data,
-  completedSteps,
+  completedPages,
   onEdit,
   onBack,
   onComplete,
   submitting,
 }: ReviewScreenProps) {
-  const completedCount = STEPS.filter((s, i) => completedSteps[i]).length;
+  const completedCount = completedPages.length;
 
   return (
     <div className="mx-auto w-full max-w-[760px] px-4 pb-40 pt-10 sm:px-6 sm:pt-14">
@@ -49,75 +51,114 @@ export function ReviewScreen({
           Looks good so far
         </h1>
         <p className="mt-3 max-w-xl text-[0.9375rem] leading-6 text-muted-foreground">
-          You&apos;ve completed {completedCount} of {STEPS.length} sections. Review each
-          one and jump back to any stage to refine your answers.
+          You&apos;ve completed {completedCount} of {PAGES.length} pages. Review each
+          section and jump back to any page to refine your answers.
         </p>
       </header>
 
-      <div className="space-y-3">
-        {STEPS.map((step, i) => {
-          const summary = stepSummary(step.id, data);
-          const filled = summary.some((s) => s.value.trim() !== "");
-          const isComplete = completedSteps[i];
+      <div className="space-y-10">
+        {GROUPS.map((group, gi) => {
+          const groupDone = group.pages.filter((p) =>
+            completedPages.includes(p.key)
+          ).length;
           return (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.3 }}
-              className="rounded-xl border border-border bg-background shadow-sm"
-            >
-              <div className="flex items-center justify-between gap-3 p-4 sm:p-5">
-                <div className="flex items-center gap-3">
+            <section key={group.label}>
+              <div className="mb-3 flex items-center justify-between border-b border-border pb-2.5">
+                <h2 className="flex items-center gap-2.5 text-[0.9375rem] font-semibold text-foreground">
                   <span
                     className={cn(
-                      "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                      isComplete
+                      "flex size-6 items-center justify-center rounded-full text-[0.6875rem] font-bold",
+                      groupDone === group.pages.length
                         ? "bg-primary text-primary-foreground"
                         : "border border-border bg-muted text-muted-foreground"
                     )}
                   >
-                    {isComplete ? <Check className="size-4" strokeWidth={3} /> : i + 1}
+                    {group.stageIndex}
                   </span>
-                  <div>
-                    <h2 className="text-[0.9375rem] font-semibold text-foreground">
-                      {STAGE_TITLES[step.id]}
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      {filled ? "All key details captured" : "Some details missing"}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEdit(step.id)}
-                >
-                  <PencilLine className="size-3.5" />
-                  Edit
-                </Button>
+                  {group.label}
+                </h2>
+                <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                  {groupDone}/{group.pages.length} complete
+                </span>
               </div>
 
-              {summary.length > 0 && (
-                <dl className="grid grid-cols-1 gap-x-6 gap-y-2.5 border-t border-border px-5 py-4 sm:grid-cols-2 sm:px-6">
-                  {summary.map((item) => (
-                    <div key={item.label} className="flex items-baseline justify-between gap-3 sm:block">
-                      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground/80">
-                        {item.label}
-                      </dt>
-                      <dd
-                        className={cn(
-                          "text-sm text-foreground sm:mt-0.5",
-                          !item.value && "italic text-muted-foreground/60"
-                        )}
-                      >
-                        {item.value || "Not provided"}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-            </motion.div>
+              <div className="space-y-3">
+                {group.pages.map((page, pi) => {
+                  const summary = pageSummary(page.key, data);
+                  const filled = summary.some((s) => s.value.trim() !== "");
+                  const isComplete = completedPages.includes(page.key);
+                  return (
+                    <motion.div
+                      key={page.key}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: gi * 0.03 + pi * 0.03, duration: 0.3 }}
+                      className="rounded-xl border border-border bg-background shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-3 p-4 sm:p-5">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={cn(
+                              "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+                              isComplete
+                                ? "bg-primary text-primary-foreground"
+                                : "border border-border bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {isComplete ? (
+                              <Check className="size-4" strokeWidth={3} />
+                            ) : (
+                              page.substepIndex + 1
+                            )}
+                          </span>
+                          <div>
+                            <h3 className="text-[0.9375rem] font-semibold text-foreground">
+                              {page.title}
+                            </h3>
+                            <p className="text-xs text-muted-foreground">
+                              {filled
+                                ? "Details captured"
+                                : "Some details missing"}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEdit(page.key)}
+                        >
+                          <PencilLine className="size-3.5" />
+                          Edit
+                        </Button>
+                      </div>
+
+                      {summary.length > 0 && (
+                        <dl className="grid grid-cols-1 gap-x-6 gap-y-2.5 border-t border-border px-5 py-4 sm:grid-cols-2 sm:px-6">
+                          {summary.map((item) => (
+                            <div
+                              key={item.label}
+                              className="flex items-baseline justify-between gap-3 sm:block"
+                            >
+                              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground/80">
+                                {item.label}
+                              </dt>
+                              <dd
+                                className={cn(
+                                  "text-sm text-foreground sm:mt-0.5",
+                                  !item.value && "italic text-muted-foreground/60"
+                                )}
+                              >
+                                {item.value || "Not provided"}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </section>
           );
         })}
       </div>

@@ -14,38 +14,31 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { PAGES, STAGE_LABELS, type OnboardingPage } from "@/lib/onboardingPages";
 
 type SavedState = "idle" | "saving" | "saved";
 
 interface StepSidebarProps {
   currentIndex: number;
-  completedSteps: boolean[];
+  completedPages: string[];
   furthest: number;
-  onStepClick: (index: number) => void;
+  onPageClick: (index: number) => void;
   savedState: SavedState;
 }
 
-interface StageDef {
+interface StageGroup {
+  stageIndex: number;
   label: string;
-  substeps: string[];
+  pages: OnboardingPage[];
 }
 
-const STAGES: StageDef[] = [
-  { label: "Welcome", substeps: [] },
-  {
-    label: "Company",
-    substeps: ["Company identity", "Organization", "Financials"],
-  },
-  {
-    label: "Operations",
-    substeps: ["Locations", "Facilities", "Vehicles", "Energy"],
-  },
-  { label: "Compliance", substeps: [] },
-  { label: "Data", substeps: [] },
-  { label: "Emissions", substeps: [] },
-  { label: "Value chain", substeps: [] },
-  { label: "Team", substeps: [] },
-];
+const STAGE_GROUPS: StageGroup[] = STAGE_LABELS.map((label, stageIndex) => ({
+  stageIndex,
+  label,
+  pages: PAGES.filter((p) => p.stageIndex === stageIndex),
+})).filter((g) => g.pages.length > 0);
+
+const REVIEW_INDEX = PAGES.length;
 
 function SavedBadge({ state }: { state: SavedState }) {
   if (state === "idle") return null;
@@ -67,20 +60,14 @@ function SavedBadge({ state }: { state: SavedState }) {
   );
 }
 
-interface ProgressState {
+function ProgressHeader({
+  done,
+  total,
+}: {
   done: number;
   total: number;
-  pct: number;
-}
-
-function computeProgress(completedSteps: boolean[]): ProgressState {
-  const total = completedSteps.length;
-  const done = completedSteps.filter(Boolean).length;
-  return { done, total, pct: Math.round((done / total) * 100) };
-}
-
-function ProgressHeader({ done, total }: Pick<ProgressState, "done" | "total">) {
-  const pct = Math.round((done / total) * 100);
+}) {
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   return (
     <div className="px-4 pt-5">
       <div className="flex items-center justify-between">
@@ -92,7 +79,7 @@ function ProgressHeader({ done, total }: Pick<ProgressState, "done" | "total">) 
         </span>
       </div>
       <p className="mt-0.5 text-xs text-muted-foreground">
-        {total} sections · {done} of {total} complete
+        {total} pages · {done} of {total} complete
       </p>
       <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <motion.div
@@ -106,133 +93,212 @@ function ProgressHeader({ done, total }: Pick<ProgressState, "done" | "total">) 
   );
 }
 
-interface StageRowProps {
-  index: number;
-  stage: StageDef;
+interface SubstepRowProps {
+  page: OnboardingPage;
   isCompleted: boolean;
   isCurrent: boolean;
   isLocked: boolean;
-  isLast: boolean;
   onSelect: () => void;
 }
 
-function StageRow({
-  index,
-  stage,
+function SubstepRow({
+  page,
   isCompleted,
   isCurrent,
   isLocked,
-  isLast,
   onSelect,
-}: StageRowProps) {
+}: SubstepRowProps) {
   return (
-    <li className="flex gap-3">
-      <div className="flex w-6 shrink-0 flex-col items-center">
+    <li>
+      <button
+        type="button"
+        disabled={isLocked}
+        onClick={onSelect}
+        aria-current={isCurrent ? "step" : undefined}
+        className={cn(
+          "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+          isCurrent && "bg-accent-muted/70",
+          isLocked && "cursor-default",
+          !isLocked && !isCurrent && "hover:bg-muted/60"
+        )}
+      >
         <span
           className={cn(
-            "relative z-10 flex size-6 items-center justify-center rounded-full border-2 bg-background transition-colors duration-300",
-            isCompleted && "border-emerald-500 bg-emerald-500 text-white",
-            isCurrent &&
-              "border-primary bg-primary text-white shadow-[0_0_0_4px_rgba(99,91,255,0.15)]",
-            isLocked && "border-border text-muted-foreground/50",
-            !isCurrent &&
-              !isCompleted &&
-              !isLocked &&
-              "border-border text-muted-foreground"
+            "flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors",
+            isCompleted && "border-primary bg-primary text-primary-foreground",
+            isCurrent && !isCompleted && "border-primary bg-primary text-primary-foreground",
+            !isCurrent && !isCompleted && "border-border bg-background",
+            isLocked && "border-border bg-background opacity-50"
           )}
         >
           {isCompleted ? (
-            <Check className="size-3.5" strokeWidth={3} />
+            <Check className="size-3" strokeWidth={3} />
           ) : (
-            <span className="text-[0.6875rem] font-semibold leading-none">
-              {index + 1}
-            </span>
-          )}
-          {isCurrent && (
             <span
-              aria-hidden
-              className="absolute inset-0 animate-ping rounded-full bg-primary/20"
+              className={cn(
+                "size-1 rounded-full",
+                isCurrent ? "bg-white" : "bg-muted-foreground/60"
+              )}
             />
           )}
         </span>
-        {!isLast && (
+        <span
+          className={cn(
+            "truncate text-[0.8125rem]",
+            isCurrent
+              ? "font-semibold text-primary"
+              : isCompleted
+                ? "font-medium text-foreground"
+                : "text-muted-foreground"
+          )}
+        >
+          {page.title}
+        </span>
+        {isLocked && (
+          <Lock className="ml-auto size-3 shrink-0 text-muted-foreground/40" />
+        )}
+      </button>
+    </li>
+  );
+}
+
+interface StageRowProps {
+  stage: StageGroup;
+  currentIndex: number;
+  completedPages: string[];
+  furthest: number;
+  onPageClick: (index: number) => void;
+}
+
+function StageRow({
+  stage,
+  currentIndex,
+  completedPages,
+  furthest,
+  onPageClick,
+}: StageRowProps) {
+  const pagesComplete = stage.pages.every((p) => completedPages.includes(p.key));
+  const isStageCurrent =
+    currentIndex >= stage.pages[0].index &&
+    currentIndex <= stage.pages[stage.pages.length - 1].index;
+  const isStageLocked = stage.pages[0].index > furthest;
+  const isExpanded = isStageCurrent;
+
+  return (
+    <li>
+      <div className="flex gap-3">
+        <div className="flex w-6 shrink-0 flex-col items-center">
+          <span
+            className={cn(
+              "relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full border-2 bg-background transition-colors duration-300",
+              pagesComplete && "border-primary bg-primary text-white",
+              isStageCurrent &&
+                "border-primary bg-primary text-white shadow-[0_0_0_4px_rgba(22,163,74,0.14)]",
+              isStageLocked && "border-border text-muted-foreground/50",
+              !isStageCurrent &&
+                !pagesComplete &&
+                !isStageLocked &&
+                "border-border text-muted-foreground"
+            )}
+          >
+            {pagesComplete ? (
+              <Check className="size-3.5" strokeWidth={3} />
+            ) : (
+              <span className="text-[0.6875rem] font-semibold leading-none">
+                {stage.stageIndex}
+              </span>
+            )}
+            {isStageCurrent && (
+              <span
+                aria-hidden
+                className="absolute inset-0 animate-ping rounded-full bg-primary/20"
+              />
+            )}
+          </span>
           <span
             className={cn(
               "mt-2 w-px flex-1 bg-border transition-colors duration-300",
-              isCompleted && "bg-emerald-500/60",
-              isCurrent && "bg-primary/50"
+              pagesComplete && "bg-primary/40"
             )}
           />
-        )}
-      </div>
+        </div>
 
-      <div className="min-w-0 flex-1 pb-5">
-        {isCurrent ? (
-          <div
-            aria-current="step"
-            className="flex w-full items-center justify-between gap-2 rounded-lg bg-accent-muted px-2.5 py-2"
-          >
-            <span className="truncate text-[0.875rem] font-semibold text-primary">
-              {stage.label}
-            </span>
-            {stage.substeps.length > 0 && (
-              <ChevronDown className="size-4 shrink-0 text-primary" />
-            )}
-          </div>
-        ) : (
-          <button
-            type="button"
-            disabled={isLocked}
-            onClick={onSelect}
-            className={cn(
-              "flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
-              isCompleted && "cursor-pointer hover:bg-muted/70",
-              isLocked && "cursor-default"
-            )}
-          >
+        <div className="min-w-0 flex-1 pb-3">
+          <div className="flex items-center justify-between gap-2 px-2 py-1.5">
             <span
               className={cn(
-                "truncate text-[0.875rem] font-medium",
-                isCompleted ? "text-foreground" : "text-muted-foreground/70"
+                "truncate text-[0.8125rem] font-semibold",
+                isStageCurrent
+                  ? "text-primary"
+                  : isStageLocked
+                    ? "text-muted-foreground/50"
+                    : "text-foreground"
               )}
             >
               {stage.label}
             </span>
-            {isLocked ? (
-              <Lock className="size-3.5 shrink-0 text-muted-foreground/40" />
-            ) : (
-              isCompleted && (
-                <Check
-                  className="size-3.5 shrink-0 text-emerald-500"
-                  strokeWidth={3}
-                />
-              )
+            {stage.pages.length > 0 && (
+              <span className="text-[0.6875rem] font-medium tabular-nums text-muted-foreground/70">
+                {stage.pages.length}
+              </span>
             )}
-          </button>
-        )}
+          </div>
 
-        <AnimatePresence initial={false}>
-          {isCurrent && stage.substeps.length > 0 && (
-            <motion.ul
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="mt-1.5 space-y-0.5 border-l-2 border-primary/15 pl-3">
-                {stage.substeps.map((s) => (
-                  <li key={s} className="flex items-center gap-2 py-1">
-                    <span className="size-1 shrink-0 rounded-full bg-primary/50" />
-                    <span className="truncate text-[0.8125rem] text-muted-foreground">
-                      {s}
-                    </span>
-                  </li>
-                ))}
-              </div>
-            </motion.ul>
-          )}
-        </AnimatePresence>
+          <AnimatePresence initial={false}>
+            {isExpanded ? (
+              <motion.ul
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="mt-1 space-y-0.5 border-l-2 border-primary/15 pl-2">
+                  {stage.pages.map((page) => (
+                    <SubstepRow
+                      key={page.key}
+                      page={page}
+                      isCompleted={completedPages.includes(page.key)}
+                      isCurrent={currentIndex === page.index}
+                      isLocked={page.index > furthest}
+                      onSelect={() => onPageClick(page.index)}
+                    />
+                  ))}
+                </div>
+              </motion.ul>
+            ) : (
+              <button
+                type="button"
+                disabled={isStageLocked}
+                onClick={() => onPageClick(stage.pages[0].index)}
+                className={cn(
+                  "mt-1 flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+                  !isStageLocked && "hover:bg-muted/60"
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors",
+                    pagesComplete
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background"
+                  )}
+                >
+                  {pagesComplete && <Check className="size-3" strokeWidth={3} />}
+                </span>
+                <span className="truncate text-[0.8125rem] text-muted-foreground">
+                  {stage.pages.length} step{stage.pages.length > 1 ? "s" : ""}
+                </span>
+                {isStageLocked && (
+                  <Lock className="ml-auto size-3 shrink-0 text-muted-foreground/40" />
+                )}
+                {!isStageLocked && !pagesComplete && (
+                  <ChevronDown className="ml-auto size-3.5 shrink-0 text-muted-foreground/50" />
+                )}
+              </button>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </li>
   );
@@ -240,31 +306,66 @@ function StageRow({
 
 interface TimelineProps {
   currentIndex: number;
-  completedSteps: boolean[];
+  completedPages: string[];
   furthest: number;
-  onStepClick: (index: number) => void;
+  onPageClick: (index: number) => void;
 }
 
 function StageTimeline({
   currentIndex,
-  completedSteps,
+  completedPages,
   furthest,
-  onStepClick,
+  onPageClick,
 }: TimelineProps) {
   return (
     <ol className="flex flex-col">
-      {STAGES.map((stage, i) => (
+      {STAGE_GROUPS.map((stage) => (
         <StageRow
           key={stage.label}
-          index={i}
           stage={stage}
-          isCompleted={completedSteps[i]}
-          isCurrent={currentIndex === i}
-          isLocked={i > furthest}
-          isLast={i === STAGES.length - 1}
-          onSelect={() => onStepClick(i)}
+          currentIndex={currentIndex}
+          completedPages={completedPages}
+          furthest={furthest}
+          onPageClick={onPageClick}
         />
       ))}
+      <li className="flex gap-3">
+        <div className="flex w-6 shrink-0 flex-col items-center">
+          <span
+            className={cn(
+              "flex size-6 shrink-0 items-center justify-center rounded-full border-2 bg-background",
+              currentIndex >= REVIEW_INDEX
+                ? "border-primary bg-primary text-white shadow-[0_0_0_4px_rgba(22,163,74,0.14)]"
+                : "border-border text-muted-foreground"
+            )}
+          >
+            <Check className="size-3.5" strokeWidth={3} />
+          </span>
+        </div>
+        <div className="min-w-0 flex-1 pb-1">
+          <button
+            type="button"
+            onClick={() => onPageClick(REVIEW_INDEX)}
+            className={cn(
+              "flex w-full items-center rounded-lg px-2 py-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+              currentIndex === REVIEW_INDEX
+                ? "bg-accent-muted/70"
+                : "hover:bg-muted/60"
+            )}
+          >
+            <span
+              className={cn(
+                "text-[0.8125rem] font-semibold",
+                currentIndex === REVIEW_INDEX
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}
+            >
+              Review & finish
+            </span>
+          </button>
+        </div>
+      </li>
     </ol>
   );
 }
@@ -297,14 +398,11 @@ function BrandLink({ compact }: { compact?: boolean }) {
   );
 }
 
-function DesktopSidebar({
-  currentIndex,
-  completedSteps,
-  furthest,
-  onStepClick,
-  savedState,
-}: StepSidebarProps) {
-  const progress = computeProgress(completedSteps);
+function DesktopSidebar(props: StepSidebarProps) {
+  const progress = {
+    done: props.completedPages.length,
+    total: PAGES.length,
+  };
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-[300px] flex-col border-r border-border bg-background lg:flex">
       <div className="flex h-16 shrink-0 items-center border-b border-border px-5">
@@ -316,38 +414,36 @@ function DesktopSidebar({
       </div>
 
       <nav className="custom-scrollbar flex-1 overflow-y-auto px-3 pb-4 pt-5">
-        <StageTimeline
-          currentIndex={currentIndex}
-          completedSteps={completedSteps}
-          furthest={furthest}
-          onStepClick={onStepClick}
-        />
+        <StageTimeline {...props} />
       </nav>
 
       <div className="flex shrink-0 items-center justify-between border-t border-border px-5 py-3.5">
         <span className="text-xs text-muted-foreground">
           Autosaved to browser
         </span>
-        <SavedBadge state={savedState} />
+        <SavedBadge state={props.savedState} />
       </div>
     </aside>
   );
 }
 
-function MobileExperience({
-  currentIndex,
-  completedSteps,
-  furthest,
-  onStepClick,
-  savedState,
-}: StepSidebarProps) {
+function MobileExperience(props: StepSidebarProps) {
   const [open, setOpen] = React.useState(false);
-  const progress = computeProgress(completedSteps);
-  const isReview = currentIndex >= STAGES.length;
-  const stageLabel = isReview ? null : STAGES[currentIndex]?.label ?? null;
-  const stepLine = isReview
-    ? "Review & finish"
-    : `Step ${currentIndex + 1} of ${STAGES.length} · ${stageLabel}`;
+  const progress = {
+    done: props.completedPages.length,
+    total: PAGES.length,
+  };
+  const isWelcome = props.currentIndex < 0;
+  const isReview = props.currentIndex >= REVIEW_INDEX;
+  const currentPage = !isWelcome && !isReview ? PAGES[props.currentIndex] : null;
+  const stepLine = isWelcome
+    ? "Welcome"
+    : isReview
+      ? "Review & finish"
+      : `${STAGE_LABELS[currentPage!.stageIndex]} · ${currentPage!.title}`;
+  const stepSub = isReview
+    ? "Review your answers"
+    : `${props.currentIndex + 1} of ${PAGES.length} pages`;
 
   React.useEffect(() => {
     if (!open) return;
@@ -363,7 +459,7 @@ function MobileExperience({
       <div className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-xl lg:hidden">
         <div className="flex h-14 items-center justify-between gap-3 px-4">
           <BrandLink compact />
-          <SavedBadge state={savedState} />
+          <SavedBadge state={props.savedState} />
         </div>
         <div className="px-4 pb-3">
           <button
@@ -376,7 +472,7 @@ function MobileExperience({
                 {stepLine}
               </span>
               <span className="text-[0.8125rem] font-semibold text-foreground">
-                Tap to open progress
+                {stepSub}
               </span>
             </span>
             <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
@@ -385,7 +481,7 @@ function MobileExperience({
             <motion.div
               className="h-full rounded-full bg-primary"
               initial={false}
-              animate={{ width: `${progress.pct}%` }}
+              animate={{ width: `${(progress.done / progress.total) * 100}%` }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
@@ -419,7 +515,7 @@ function MobileExperience({
                     Workspace setup
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    {progress.pct}% complete
+                    {progress.done} of {progress.total} pages complete
                   </p>
                 </div>
                 <button
@@ -433,11 +529,9 @@ function MobileExperience({
               </div>
               <div className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">
                 <StageTimeline
-                  currentIndex={currentIndex}
-                  completedSteps={completedSteps}
-                  furthest={furthest}
-                  onStepClick={(i) => {
-                    onStepClick(i);
+                  {...props}
+                  onPageClick={(i) => {
+                    props.onPageClick(i);
                     setOpen(false);
                   }}
                 />

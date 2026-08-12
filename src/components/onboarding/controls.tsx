@@ -112,7 +112,7 @@ export function SelectableCards({
               className={cn(
                 "group relative flex items-start gap-3 rounded-xl border p-3.5 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                 isSelected
-                  ? "border-primary bg-accent-muted/60 shadow-[0_0_0_3px_rgba(99,91,255,0.12)]"
+                  ? "border-primary bg-accent-muted/60 shadow-[0_0_0_3px_rgba(22,163,74,0.12)]"
                   : "border-border bg-background hover:border-foreground/25 hover:bg-secondary/50"
               )}
             >

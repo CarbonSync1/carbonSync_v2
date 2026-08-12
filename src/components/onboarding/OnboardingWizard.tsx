@@ -22,58 +22,19 @@ import {
   loadOnboarding,
   saveOnboarding,
 } from "@/lib/onboardingStorage";
-import { STEP_INDEX, STEPS, validateStep } from "@/lib/onboardingValidation";
-import type { OnboardingData, OnboardingKey, StepId } from "@/types/onboarding";
+import {
+  PAGE_INDEX,
+  PAGES,
+  STAGE_LABELS,
+  isLastPageOfStep,
+  pageIndexForStep,
+} from "@/lib/onboardingPages";
+import { STEP_INDEX, validatePage } from "@/lib/onboardingValidation";
+import type { OnboardingData, OnboardingKey } from "@/types/onboarding";
 
-const SCREEN_COUNT = STEPS.length + 1; // welcome (0), 7 steps (1-7), review (8), done (9)
-
-const STEP_META: Record<StepId, { title: string; description: string }> = {
-  company: {
-    title: "Tell us about your company",
-    description:
-      "A few details about your legal entity and size. This anchors every report we produce for you.",
-  },
-  locations: {
-    title: "Where do you operate?",
-    description:
-      "Your physical footprint — facilities, countries and fleet — drives most of your direct emissions.",
-  },
-  reporting: {
-    title: "What are you reporting for?",
-    description:
-      "Frameworks, deadlines and audiences shape the reports, templates and evidence trails we configure.",
-  },
-  integrations: {
-    title: "Where does your data live?",
-    description:
-      "Tell us about the systems you already use so we can wire them up. Nothing here is required to start.",
-  },
-  emissions: {
-    title: "Your emissions profile",
-    description:
-      "The fuels and energy you consume determine which activity factors we apply from day one.",
-  },
-  valueChain: {
-    title: "Who else is in your footprint?",
-    description:
-      "Value chain categories cover suppliers, travel, logistics, cloud and product flows.",
-  },
-  strategy: {
-    title: "Your targets and your team",
-    description:
-      "Set ambition and bring colleagues in — we'll tailor dashboards and alerts to match.",
-  },
-};
-
-const STEP_EYEBROW: Record<StepId, string> = {
-  company: "Step 1 of 7 · Company identity",
-  locations: "Step 2 of 7 · Locations & operations",
-  reporting: "Step 3 of 7 · Reporting & compliance",
-  integrations: "Step 4 of 7 · Data & integrations",
-  emissions: "Step 5 of 7 · Emissions profile",
-  valueChain: "Step 6 of 7 · Value chain",
-  strategy: "Step 7 of 7 · Strategy & team",
-};
+const WELCOME_INDEX = -1;
+const REVIEW_INDEX = PAGES.length;
+const DONE_INDEX = PAGES.length + 1;
 
 type SavedState = "idle" | "saving" | "saved";
 
@@ -86,34 +47,43 @@ export function OnboardingWizard() {
   });
   const [index, setIndex] = React.useState<number>(() => {
     const saved = loadOnboarding();
-    if (saved?.finished) return SCREEN_COUNT + 1;
-    return 0;
+    if (saved?.finished) return DONE_INDEX;
+    if (saved?.currentPageKey && PAGE_INDEX[saved.currentPageKey] != null)
+      return PAGE_INDEX[saved.currentPageKey];
+    if (saved?.currentStep && STEP_INDEX[saved.currentStep] != null)
+      return pageIndexForStep(saved.currentStep);
+    return WELCOME_INDEX;
   });
   const [direction, setDirection] = React.useState(1);
-  const [completed, setCompleted] = React.useState<boolean[]>(() => {
+  const [completedPages, setCompletedPages] = React.useState<string[]>(() => {
     const saved = loadOnboarding();
-    if (!saved?.data) return STEPS.map(() => false);
-    if (saved.finished === true) return STEPS.map(() => true);
-    return STEPS.map(
-      (step) => saved.completedSteps?.includes(step.id) ?? false
+    if (!saved) return [];
+    if (saved.finished) return PAGES.map((p) => p.key);
+    if (saved.completedPages) return saved.completedPages;
+    return (saved.completedSteps ?? []).flatMap((step) =>
+      PAGES.filter((p) => p.stepId === step).map((p) => p.key)
     );
   });
   const [furthest, setFurthest] = React.useState<number>(() => {
     const saved = loadOnboarding();
-    if (!saved?.data) return 0;
-    if (saved.finished) return SCREEN_COUNT;
-    return saved.currentStep
-      ? Math.max(0, Math.min(STEP_INDEX[saved.currentStep] + 1, SCREEN_COUNT))
-      : 0;
+    if (saved?.finished) return DONE_INDEX;
+    let idx: number | null = null;
+    if (saved?.currentPageKey && PAGE_INDEX[saved.currentPageKey] != null)
+      idx = PAGE_INDEX[saved.currentPageKey];
+    else if (saved?.currentStep && STEP_INDEX[saved.currentStep] != null)
+      idx = pageIndexForStep(saved.currentStep);
+    return idx != null ? idx : WELCOME_INDEX;
   });
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
   const [savedState, setSavedState] = React.useState<SavedState>("idle");
   const [submitting, setSubmitting] = React.useState(false);
 
-  const currentStepId =
-    index > 0 && index < SCREEN_COUNT ? STEPS[index - 1].id : null;
-  const isReview = index === SCREEN_COUNT;
-  const isDone = index === SCREEN_COUNT + 1;
+  const currentPage =
+    index >= 0 && index < PAGES.length ? PAGES[index] : null;
+  const currentStepId = currentPage?.stepId ?? null;
+  const isWelcome = index === WELCOME_INDEX;
+  const isReview = index === REVIEW_INDEX;
+  const isDone = index === DONE_INDEX;
 
   const markDirty = React.useCallback(() => setSavedState("saving"), []);
 
@@ -121,8 +91,8 @@ export function OnboardingWizard() {
     const t = window.setTimeout(() => {
       saveOnboarding({
         data,
-        currentStep: currentStepId ?? STEPS[0].id,
-        completedSteps: STEPS.filter((_, i) => completed[i]).map((s) => s.id),
+        currentPageKey: currentPage?.key ?? PAGES[0].key,
+        completedPages,
         ...(isDone ? { finished: true as const } : {}),
       });
       setSavedState("saved");
@@ -130,7 +100,7 @@ export function OnboardingWizard() {
       return () => window.clearTimeout(reset);
     }, 450);
     return () => window.clearTimeout(t);
-  }, [data, completed, index, currentStepId, isDone]);
+  }, [data, completedPages, index, currentPage?.key, isDone]);
 
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -148,8 +118,8 @@ export function OnboardingWizard() {
   );
 
   const errors = React.useMemo(
-    () => (currentStepId ? validateStep(currentStepId, data) : {}),
-    [currentStepId, data]
+    () => (currentPage ? validatePage(currentPage.key, data) : {}),
+    [currentPage, data]
   );
 
   const err = React.useCallback(
@@ -163,36 +133,39 @@ export function OnboardingWizard() {
   }, []);
 
   const goTo = (next: number, dir: number) => {
+    const clamped = Math.max(WELCOME_INDEX, Math.min(next, DONE_INDEX));
     markDirty();
     setDirection(dir);
-    setIndex(next);
-    setFurthest((f) => Math.max(f, next));
+    setIndex(clamped);
+    setFurthest((f) => Math.max(f, clamped));
     setTouched({});
   };
 
   const handleContinue = () => {
-    if (currentStepId && index < SCREEN_COUNT) {
-      const stepErrors = validateStep(currentStepId, data);
-      if (Object.keys(stepErrors).length > 0) {
-        setTouched(Object.fromEntries(Object.keys(stepErrors).map((k) => [k, true])));
+    if (currentPage) {
+      const pageErrors = validatePage(currentPage.key, data);
+      if (Object.keys(pageErrors).length > 0) {
+        setTouched(
+          Object.fromEntries(Object.keys(pageErrors).map((k) => [k, true]))
+        );
         return;
       }
-      setCompleted((prev) => {
-        const next = [...prev];
-        next[index - 1] = true;
-        return next;
-      });
+      setCompletedPages((prev) =>
+        prev.includes(currentPage.key) ? prev : [...prev, currentPage.key]
+      );
     }
     goTo(index + 1, 1);
   };
 
   const handleBack = () => {
-    if (index === 0) return;
+    if (index <= WELCOME_INDEX) return;
     goTo(index - 1, -1);
   };
 
-  const handleEdit = (step: StepId) => {
-    goTo(STEP_INDEX[step] + 1, -1);
+  const handleEdit = (pageKey: string) => {
+    const target = PAGE_INDEX[pageKey];
+    if (target == null) return;
+    goTo(target, -1);
   };
 
   const handleComplete = () => {
@@ -200,14 +173,15 @@ export function OnboardingWizard() {
     setSubmitting(true);
     window.setTimeout(() => {
       setSubmitting(false);
-      setCompleted(STEPS.map(() => true));
+      const allKeys = PAGES.map((p) => p.key);
+      setCompletedPages(allKeys);
       saveOnboarding({
         data,
-        currentStep: "strategy",
-        completedSteps: STEPS.map((s) => s.id),
+        currentPageKey: PAGES[PAGES.length - 1].key,
+        completedPages: allKeys,
         finished: true,
       });
-      setIndex(SCREEN_COUNT + 1);
+      setIndex(DONE_INDEX);
     }, 900);
   };
 
@@ -228,19 +202,21 @@ export function OnboardingWizard() {
     );
   }
 
-  if (index === 0) {
+  if (isWelcome) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <StepSidebar
-          currentIndex={0}
-          completedSteps={[false, ...completed]}
+          currentIndex={index}
+          completedPages={completedPages}
           furthest={furthest}
-          onStepClick={(i) => goTo(i, i > index ? 1 : -1)}
+          onPageClick={(i) => goTo(i, i > index ? 1 : -1)}
           savedState={savedState}
         />
         <main className="lg:pl-[300px]">
           <WelcomeScreen
-            onStart={() => goTo(Math.max(1, Math.min(furthest, SCREEN_COUNT)), 1)}
+            onStart={() =>
+              goTo(Math.max(0, Math.min(furthest, PAGES.length - 1)), 1)
+            }
           />
         </main>
       </div>
@@ -252,9 +228,9 @@ export function OnboardingWizard() {
       <div className="min-h-screen bg-background text-foreground">
         <StepSidebar
           currentIndex={index}
-          completedSteps={[true, ...completed]}
+          completedPages={completedPages}
           furthest={furthest}
-          onStepClick={(i) => goTo(i, -1)}
+          onPageClick={(i) => goTo(i, -1)}
           savedState={savedState}
         />
         <main className="lg:pl-[300px]">
@@ -268,7 +244,7 @@ export function OnboardingWizard() {
             >
               <ReviewScreen
                 data={data}
-                completedSteps={completed}
+                completedPages={completedPages}
                 onEdit={handleEdit}
                 onBack={handleBack}
                 onComplete={handleComplete}
@@ -281,16 +257,18 @@ export function OnboardingWizard() {
     );
   }
 
-  const meta = STEP_META[currentStepId!];
-  const stepIndex = index + 1;
+  const page = currentPage!;
+  const stageLabel = STAGE_LABELS[page.stageIndex] ?? page.stepId;
+  const stepPageCount = PAGES.filter((p) => p.stepId === page.stepId).length;
+  const stageFirstIndex = page.index - page.substepIndex;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <StepSidebar
         currentIndex={index}
-        completedSteps={[true, ...completed]}
+        completedPages={completedPages}
         furthest={furthest}
-        onStepClick={(i) => goTo(i, i > index ? 1 : -1)}
+        onPageClick={(i) => goTo(i, i > index ? 1 : -1)}
         savedState={savedState}
       />
 
@@ -305,34 +283,87 @@ export function OnboardingWizard() {
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
             <StepShell
-              eyebrow={STEP_EYEBROW[currentStepId!]}
-              title={meta.title}
-              description={meta.description}
-              showBack={index > 0}
+              eyebrow={`${stageLabel} · ${index + 1} of ${PAGES.length}`}
+              title={page.title}
+              description={page.description}
+              showBack={index > WELCOME_INDEX}
               onBack={handleBack}
               onContinue={handleContinue}
-              continueLabel={stepIndex === SCREEN_COUNT ? "Review setup" : "Continue"}
+              continueLabel={
+                isLastPageOfStep(index) ? "Review setup" : "Continue"
+              }
+              pips={{
+                total: stepPageCount,
+                current: page.substepIndex,
+                onSelect: (i) =>
+                  goTo(
+                    stageFirstIndex + i,
+                    i > page.substepIndex ? 1 : -1
+                  ),
+              }}
             >
               {currentStepId === "company" && (
-                <CompanyIdentityStep data={data} update={update} err={err} touch={touch} />
+                <CompanyIdentityStep
+                  data={data}
+                  update={update}
+                  err={err}
+                  touch={touch}
+                  section={page.section}
+                />
               )}
               {currentStepId === "locations" && (
-                <LocationsOperationsStep data={data} update={update} err={err} touch={touch} />
+                <LocationsOperationsStep
+                  data={data}
+                  update={update}
+                  err={err}
+                  touch={touch}
+                  section={page.section}
+                />
               )}
               {currentStepId === "reporting" && (
-                <ReportingComplianceStep data={data} update={update} err={err} touch={touch} />
+                <ReportingComplianceStep
+                  data={data}
+                  update={update}
+                  err={err}
+                  touch={touch}
+                  section={page.section}
+                />
               )}
               {currentStepId === "integrations" && (
-                <DataIntegrationsStep data={data} update={update} err={err} touch={touch} />
+                <DataIntegrationsStep
+                  data={data}
+                  update={update}
+                  err={err}
+                  touch={touch}
+                  section={page.section}
+                />
               )}
               {currentStepId === "emissions" && (
-                <EmissionsProfileStep data={data} update={update} err={err} touch={touch} />
+                <EmissionsProfileStep
+                  data={data}
+                  update={update}
+                  err={err}
+                  touch={touch}
+                  section={page.section}
+                />
               )}
               {currentStepId === "valueChain" && (
-                <ValueChainStep data={data} update={update} err={err} touch={touch} />
+                <ValueChainStep
+                  data={data}
+                  update={update}
+                  err={err}
+                  touch={touch}
+                  section={page.section}
+                />
               )}
               {currentStepId === "strategy" && (
-                <StrategyTeamStep data={data} update={update} err={err} touch={touch} />
+                <StrategyTeamStep
+                  data={data}
+                  update={update}
+                  err={err}
+                  touch={touch}
+                  section={page.section}
+                />
               )}
             </StepShell>
           </motion.div>
