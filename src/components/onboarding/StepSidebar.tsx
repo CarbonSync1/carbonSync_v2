@@ -14,7 +14,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
-import { STEPS } from "@/lib/onboardingValidation";
 
 type SavedState = "idle" | "saving" | "saved";
 
@@ -32,8 +31,7 @@ interface StageDef {
 }
 
 const STAGES: StageDef[] = [
-  
-  
+  { label: "Welcome", substeps: [] },
   {
     label: "Company",
     substeps: ["Company identity", "Organization", "Financials"],
@@ -76,7 +74,7 @@ interface ProgressState {
 }
 
 function computeProgress(completedSteps: boolean[]): ProgressState {
-  const total = STEPS.length;
+  const total = completedSteps.length;
   const done = completedSteps.filter(Boolean).length;
   return { done, total, pct: Math.round((done / total) * 100) };
 }

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { StepSidebar } from "./StepSidebar";
 import { StepShell } from "./StepShell";
 import { ReviewScreen } from "./ReviewScreen";
+import { WelcomeScreen } from "./WelcomeScreen";
 import { WorkspaceReady } from "./WorkspaceReady";
 import { CompanyIdentityStep } from "./steps/CompanyIdentityStep";
 import { LocationsOperationsStep } from "./steps/LocationsOperationsStep";
@@ -24,7 +25,7 @@ import {
 import { STEP_INDEX, STEPS, validateStep } from "@/lib/onboardingValidation";
 import type { OnboardingData, OnboardingKey, StepId } from "@/types/onboarding";
 
-const SCREEN_COUNT = STEPS.length; // 7 steps, index 7 = review, 8 = done
+const SCREEN_COUNT = STEPS.length + 1; // welcome (0), 7 steps (1-7), review (8), done (9)
 
 const STEP_META: Record<StepId, { title: string; description: string }> = {
   company: {
@@ -85,9 +86,8 @@ export function OnboardingWizard() {
   });
   const [index, setIndex] = React.useState<number>(() => {
     const saved = loadOnboarding();
-    if (!saved?.data) return 0;
-    if (saved.finished) return SCREEN_COUNT + 1;
-    return saved.currentStep ? Math.min(STEP_INDEX[saved.currentStep], SCREEN_COUNT) : 0;
+    if (saved?.finished) return SCREEN_COUNT + 1;
+    return 0;
   });
   const [direction, setDirection] = React.useState(1);
   const [completed, setCompleted] = React.useState<boolean[]>(() => {
@@ -102,13 +102,16 @@ export function OnboardingWizard() {
     const saved = loadOnboarding();
     if (!saved?.data) return 0;
     if (saved.finished) return SCREEN_COUNT;
-    return saved.currentStep ? Math.max(0, Math.min(STEP_INDEX[saved.currentStep], SCREEN_COUNT)) : 0;
+    return saved.currentStep
+      ? Math.max(0, Math.min(STEP_INDEX[saved.currentStep] + 1, SCREEN_COUNT))
+      : 0;
   });
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
   const [savedState, setSavedState] = React.useState<SavedState>("idle");
   const [submitting, setSubmitting] = React.useState(false);
 
-  const currentStepId = index < SCREEN_COUNT ? STEPS[index].id : null;
+  const currentStepId =
+    index > 0 && index < SCREEN_COUNT ? STEPS[index - 1].id : null;
   const isReview = index === SCREEN_COUNT;
   const isDone = index === SCREEN_COUNT + 1;
 
@@ -176,7 +179,7 @@ export function OnboardingWizard() {
       }
       setCompleted((prev) => {
         const next = [...prev];
-        next[index] = true;
+        next[index - 1] = true;
         return next;
       });
     }
@@ -189,7 +192,7 @@ export function OnboardingWizard() {
   };
 
   const handleEdit = (step: StepId) => {
-    goTo(STEP_INDEX[step], -1);
+    goTo(STEP_INDEX[step] + 1, -1);
   };
 
   const handleComplete = () => {
@@ -225,12 +228,31 @@ export function OnboardingWizard() {
     );
   }
 
+  if (index === 0) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <StepSidebar
+          currentIndex={0}
+          completedSteps={[false, ...completed]}
+          furthest={furthest}
+          onStepClick={(i) => goTo(i, i > index ? 1 : -1)}
+          savedState={savedState}
+        />
+        <main className="lg:pl-[300px]">
+          <WelcomeScreen
+            onStart={() => goTo(Math.max(1, Math.min(furthest, SCREEN_COUNT)), 1)}
+          />
+        </main>
+      </div>
+    );
+  }
+
   if (isReview) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <StepSidebar
-          currentIndex={STEPS.length}
-          completedSteps={completed}
+          currentIndex={index}
+          completedSteps={[true, ...completed]}
           furthest={furthest}
           onStepClick={(i) => goTo(i, -1)}
           savedState={savedState}
@@ -266,7 +288,7 @@ export function OnboardingWizard() {
     <div className="min-h-screen bg-background text-foreground">
       <StepSidebar
         currentIndex={index}
-        completedSteps={completed}
+        completedSteps={[true, ...completed]}
         furthest={furthest}
         onStepClick={(i) => goTo(i, i > index ? 1 : -1)}
         savedState={savedState}
