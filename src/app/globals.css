@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@theme inline {
+@theme {
   --color-accent: #635bff;
   --color-accent-strong: #4f46e5;
   --color-accent-soft: #eef0ff;
@@ -111,6 +111,18 @@
 
   /* Typography scale */
   h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+}
+
+/* Green accent scope for the onboarding flow (overrides primary/accent tokens) */
+.onboarding-green {
+  --color-primary: #16a34a;
+  --color-primary-hover: #15803d;
+  --color-accent: #16a34a;
+  --color-accent-strong: #15803d;
+  --color-accent-soft: #ecfdf3;
+  --color-accent-softer: #f7fdf9;
+  --color-accent-muted: #ecfdf3;
+  --color-ring: #16a34a;
 }
 
 @layer utilities {
