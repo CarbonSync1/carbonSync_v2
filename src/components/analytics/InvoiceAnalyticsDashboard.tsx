@@ -213,7 +213,7 @@ export function InvoiceAnalyticsDashboard() {
                 </svg>
                 <div className="flex h-12 w-12 items-center justify-center overflow-visible">
                   <img 
-                    src="/CarbonSynqEarthLogo.jpg" 
+                    src="/netzero/carbonsynqearth-logo.webp" 
                     alt="CarbonSynqEarth Logo" 
                     className="h-full w-full object-cover object-bottom scale-[2.4] origin-bottom translate-y-0.5" 
                     style={{ filter: "url(#remove-black)" }}

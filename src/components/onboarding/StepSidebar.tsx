@@ -8,9 +8,9 @@ import {
   ChevronsUpDown,
   CloudUpload,
   Lock,
-  Sparkles,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
@@ -32,6 +32,8 @@ interface StageDef {
 }
 
 const STAGES: StageDef[] = [
+  
+  
   {
     label: "Company",
     substeps: ["Company identity", "Organization", "Financials"],
@@ -279,9 +281,14 @@ function BrandLink({ compact }: { compact?: boolean }) {
       )}
       aria-label="CarbonSynq home"
     >
-      <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
-        <Sparkles className="size-4" />
-      </span>
+      <Image
+        src="/carbonsync.webp"
+        alt="CarbonSynq logo"
+        width={64}
+        height={64}
+        unoptimized
+        className="h-8 w-8 object-contain transition-transform group-hover:scale-105"
+      />
       <span className="text-[0.9375rem] font-bold tracking-tight text-foreground">
         CarbonSynq
       </span>

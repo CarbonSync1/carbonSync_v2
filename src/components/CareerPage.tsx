@@ -206,7 +206,7 @@ export default function CarbonSynqCareerPage() {
                 {/* Text and Logo Embedded INSIDE the Image */}
                 <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-center">
                   {/* Embedded Logo Moved Above JOIN */}
-                  <img src="/unnamed.webp" alt="CarbonSynq Logo" className="h-8 md:h-10 w-auto object-contain brightness-0 invert drop-shadow-lg mb-4 self-start" />
+                  <img src="/carbonsync.webp" alt="CarbonSynq Logo" className="h-8 md:h-10 w-auto object-contain brightness-0 invert drop-shadow-lg mb-4 self-start" />
 
                   <p className="text-white font-medium tracking-widest text-sm uppercase mb-1 drop-shadow-md">Join Our</p>
                   

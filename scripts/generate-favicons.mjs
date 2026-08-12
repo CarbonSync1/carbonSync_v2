@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 
-const SOURCE = 'public/unnamed.png';
+const SOURCE = 'public/carbonsync.png';
 const FAVICON_SIZES = [16, 32, 48];
 const ICON_SIZES = [
   { name: 'favicon-16x16.png', size: 16 },

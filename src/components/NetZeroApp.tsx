@@ -332,7 +332,7 @@ export default function App() {
           <div className="lg:col-span-6 flex flex-col items-start text-left">
             <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#4ade80] mb-6">
               <img
-                src="/unnamed.webp"
+                src="/carbonsync.webp"
                 alt="CarbonSynq Logo"
                 className="w-10 h-10 object-contain"
               />
@@ -645,7 +645,7 @@ export default function App() {
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 mb-6 uppercase tracking-widest">
               <img
-                src="/unnamed.webp"
+                src="/carbonsync.webp"
                 alt="CarbonSynq Logo"
                 className="w-10 h-10 object-contain"
               />{" "}
@@ -930,7 +930,7 @@ export default function App() {
                     {/* URL / Brand Address Bar */}
                     <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-600">
                       <img
-                        src="/unnamed.webp"
+                        src="/carbonsync.webp"
                         alt="CarbonSynq Logo"
                         className="w-10 h-10 object-contain"
                       />
@@ -1028,7 +1028,7 @@ export default function App() {
 
               <h4 className="text-lg font-bold text-black mb-6 flex items-center gap-2">
                 <img
-                  src="/unnamed.webp"
+                  src="/carbonsync.webp"
                   alt="CarbonSynq Logo"
                   className="w-12 h-12 object-contain"
                 />{" "}
@@ -1458,7 +1458,7 @@ export default function App() {
             <div className="flex-1 text-center lg:text-left relative z-10">
               <div className="inline-flex items-center gap-2 text-[10px] font-bold text-emerald-400 mb-4 uppercase tracking-widest">
                 <img
-                  src="/unnamed.webp"
+                  src="/carbonsync.webp"
                   alt="CarbonSynq Logo"
                   className="w-10 h-10 object-contain"
                 />
@@ -1661,7 +1661,7 @@ export default function App() {
 
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-200">
                 <img
-                  src="/unnamed.webp"
+                  src="/carbonsync.webp"
                   alt="CarbonSynq Logo"
                   className="w-14 h-14 object-contain"
                 />
@@ -1704,7 +1704,7 @@ export default function App() {
               <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-200">
                 <div className="flex items-center gap-3">
                   <img
-                    src="/unnamed.webp"
+                    src="/carbonsync.webp"
                     alt="CarbonSynq Logo"
                     className="w-14 h-14 object-contain"
                   />
@@ -2411,7 +2411,7 @@ export default function App() {
 
             <div className="mb-8">
               <img
-                src="/unnamed.webp"
+                src="/carbonsync.webp"
                 alt="CarbonSynq Logo"
                 className="w-16 h-16 object-contain mb-4"
               />

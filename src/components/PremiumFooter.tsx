@@ -14,7 +14,7 @@ export default function PremiumFooter() {
             {/* Logo + brand name — items-start so brand text aligns with nav h4 headings */}
             <div className="flex items-start gap-3">
               <img
-                src="/unnamed.webp"
+                src="/carbonsync.webp"
                 alt="CarbonSynqEarth"
                 className="h-11 w-auto object-contain flex-shrink-0"
               />
