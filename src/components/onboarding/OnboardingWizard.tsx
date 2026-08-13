@@ -92,7 +92,7 @@ export function OnboardingWizard() {
       saveOnboarding({
         data,
         currentPageKey: currentPage?.key ?? PAGES[0].key,
-        completedPages,
+        completedPages,                                                                                                                                                               
         ...(isDone ? { finished: true as const } : {}),
       });
       setSavedState("saved");
