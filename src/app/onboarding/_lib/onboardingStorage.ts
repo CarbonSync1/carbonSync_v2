@@ -1,5 +1,5 @@
-import type { OnboardingData, StepId } from "@/types/onboarding";
-import { getStorageItem, setStorageItem } from "./storage";
+import type { OnboardingData, StepId } from "../_types/onboarding";
+import { getStorageItem, setStorageItem } from "@/lib/storage";
 
 export const ONBOARDING_STORAGE_KEY = "carbonsynq_onboarding_v1";
 

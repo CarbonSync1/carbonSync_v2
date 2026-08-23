@@ -1,4 +1,4 @@
-import type { OnboardingData, StepId } from "@/types/onboarding";
+import type { OnboardingData, StepId } from "../_types/onboarding";
 
 export interface SummaryItem {
   label: string;

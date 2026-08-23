@@ -21,16 +21,16 @@ import {
   clearOnboarding,
   loadOnboarding,
   saveOnboarding,
-} from "@/lib/onboardingStorage";
+} from "../_lib/onboardingStorage";
 import {
   PAGE_INDEX,
   PAGES,
   STAGE_LABELS,
   isLastPageOfStep,
   pageIndexForStep,
-} from "@/lib/onboardingPages";
-import { STEP_INDEX, validatePage } from "@/lib/onboardingValidation";
-import type { OnboardingData, OnboardingKey } from "@/types/onboarding";
+} from "../_lib/onboardingPages";
+import { STEP_INDEX, validatePage } from "../_lib/onboardingValidation";
+import type { OnboardingData, OnboardingKey } from "../_types/onboarding";
 
 const WELCOME_INDEX = -1;
 const REVIEW_INDEX = PAGES.length;

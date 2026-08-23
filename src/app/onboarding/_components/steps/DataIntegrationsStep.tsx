@@ -17,8 +17,8 @@ import {
   IOT_OPTIONS,
   PROCUREMENT_OPTIONS,
   TRAVEL_OPTIONS,
-} from "@/data/onboarding";
-import type { OnboardingData, OnboardingKey } from "@/types/onboarding";
+} from "../../_data/onboarding";
+import type { OnboardingData, OnboardingKey } from "../../_types/onboarding";
 
 interface StepProps {
   data: OnboardingData;

@@ -23,8 +23,8 @@ import {
   SPEND_CATEGORIES,
   SUPPLIER_DATA_OPTIONS,
   WASTE_OPTIONS,
-} from "@/data/onboarding";
-import type { OnboardingData, OnboardingKey } from "@/types/onboarding";
+} from "../../_data/onboarding";
+import type { OnboardingData, OnboardingKey } from "../../_types/onboarding";
 
 interface StepProps {
   data: OnboardingData;

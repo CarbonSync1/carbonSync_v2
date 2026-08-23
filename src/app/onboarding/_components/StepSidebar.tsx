@@ -14,7 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
-import { PAGES, STAGE_LABELS, type OnboardingPage } from "@/lib/onboardingPages";
+import { PAGES, STAGE_LABELS, type OnboardingPage } from "../_lib/onboardingPages";
 
 type SavedState = "idle" | "saving" | "saved";
 

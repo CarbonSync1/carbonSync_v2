@@ -15,8 +15,8 @@ import {
   TARGET_OPTIONS,
   USER_ROLES,
   WORKFLOWS,
-} from "@/data/onboarding";
-import type { OnboardingData, OnboardingKey } from "@/types/onboarding";
+} from "../../_data/onboarding";
+import type { OnboardingData, OnboardingKey } from "../../_types/onboarding";
 
 interface StepProps {
   data: OnboardingData;

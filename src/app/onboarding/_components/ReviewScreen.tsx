@@ -6,9 +6,9 @@ import { ArrowLeft, ArrowRight, Check, PencilLine, Sparkles } from "lucide-react
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PAGES, STAGE_LABELS } from "@/lib/onboardingPages";
-import { pageSummary } from "@/lib/onboardingSummaries";
-import type { OnboardingData } from "@/types/onboarding";
+import { PAGES, STAGE_LABELS } from "../_lib/onboardingPages";
+import { pageSummary } from "../_lib/onboardingSummaries";
+import type { OnboardingData } from "../_types/onboarding";
 
 interface ReviewScreenProps {
   data: OnboardingData;

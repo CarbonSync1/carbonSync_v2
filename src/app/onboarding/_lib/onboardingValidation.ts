@@ -1,4 +1,4 @@
-import type { OnboardingData, StepId } from "@/types/onboarding";
+import type { OnboardingData, StepId } from "../_types/onboarding";
 import { PAGE_BY_KEY, PAGE_FIELDS } from "./onboardingPages";
 
 export type StepErrors = Partial<Record<string, string>>;

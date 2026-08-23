@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
+import { OnboardingWizard } from "./_components/OnboardingWizard";
+import "./onboarding.css";
 
 export const metadata: Metadata = {
   title: "Set up your workspace · CarbonSynq",

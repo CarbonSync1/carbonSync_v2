@@ -16,8 +16,8 @@ import {
   ON_SITE_ENERGY,
   OWNERSHIP_STATUSES,
   VEHICLE_OPTIONS,
-} from "@/data/onboarding";
-import type { OnboardingData, OnboardingKey } from "@/types/onboarding";
+} from "../../_data/onboarding";
+import type { OnboardingData, OnboardingKey } from "../../_types/onboarding";
 
 interface StepProps {
   data: OnboardingData;

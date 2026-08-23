@@ -13,8 +13,8 @@ import {
   REFRIGERANTS,
   SCOPE1_FUELS,
   STEAM_OPTIONS,
-} from "@/data/onboarding";
-import type { OnboardingData, OnboardingKey } from "@/types/onboarding";
+} from "../../_data/onboarding";
+import type { OnboardingData, OnboardingKey } from "../../_types/onboarding";
 
 interface StepProps {
   data: OnboardingData;

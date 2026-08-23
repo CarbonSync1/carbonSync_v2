@@ -1,4 +1,4 @@
-import type { StepId } from "@/types/onboarding";
+import type { StepId } from "../_types/onboarding";
 
 export interface OnboardingPage {
   key: string;
